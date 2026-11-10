@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Pixelify Sans';
+  src: url(../fonts/PixelifySans-VariableFont_wght.ttf) format('truetype');
+  font-weight: 400 700;
+  font-display: block;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: #0f0128;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+body {
+  color: #f3ddb0;
+  font-family: -apple-system, Inter, system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+/* Global rendering rule: never smooth-scale the pixel art. */
+img,
+canvas,
+.pixelated {
+  image-rendering: pixelated;
+}
+img {
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+button {
+  font: inherit;
+  color: inherit;
+}
+.safe {
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+.scroll-y {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scroll-y::-webkit-scrollbar { display: none; }
+.text-shadow { text-shadow: 2px 2px 0 rgba(15, 1, 40, 0.9); }
+
+@keyframes wizard-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+.wizard-float { animation: wizard-float 3s steps(4) infinite; }
+
+@keyframes drift-a {
+  0% { transform: translate(0, 0); opacity: 0.25; }
+  30% { opacity: 0.9; }
+  100% { transform: translate(60px, -140px); opacity: 0; }
+}
+@keyframes drift-b {
+  0% { transform: translate(0, 0); opacity: 0; }
+  40% { opacity: 0.8; }
+  100% { transform: translate(-70px, -110px); opacity: 0.1; }
+}
+@keyframes seed-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes shake {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-6px, 4px); }
+  50% { transform: translate(5px, -5px); }
+  75% { transform: translate(-4px, -3px); }
+  100% { transform: translate(0, 0); }
+}
+.shake { animation: shake 150ms steps(4) 1; }
+@media (prefers-reduced-motion: reduce) {
+  .wizard-float, .shake { animation: none; }
+}

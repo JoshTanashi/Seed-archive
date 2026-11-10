@@ -1,0 +1,205 @@
+{
+  "_note": "Bramblewick voice manifest. Audio split from two ElevenLabs takes in this exact order. 'text' = what shows in the speech bubble (tags stripped). 'tts' = what was sent to ElevenLabs. 'pose' = sprite from the pose sheet. Portrait frames live in wizard/*.png, all the same size and position (stack them, never reposition).",
+  "intro": [
+    {
+      "id": "intro-01",
+      "file": "audio/voice/intro-01.mp3",
+      "pose": "sleepy",
+      "text": "Mmm… hrrmph… zzz…",
+      "tts": "[snoring softly] Mmm… hrrmph… zzz…"
+    },
+    {
+      "id": "intro-02",
+      "file": "audio/voice/intro-02.mp3",
+      "pose": "startled",
+      "text": "WHA— GERALD?! Gerald, you old toad! You came back!",
+      "tts": "[startled] WHA— GERALD?! [excited] Gerald, you old toad! You came back!",
+      "fullBody": "startled-jump"
+    },
+    {
+      "id": "intro-03",
+      "file": "audio/voice/intro-03.mp3",
+      "pose": "suspicious",
+      "text": "…Hang on. You don't smell like mushrooms. You're not Gerald.",
+      "tts": "[pause] [suspicious] …Hang on. [sniffs] You don't smell like mushrooms. You're not Gerald."
+    },
+    {
+      "id": "intro-04",
+      "file": "audio/voice/intro-04.mp3",
+      "pose": "sad",
+      "text": "Gerald went out for mushrooms. Said he'd be back by supper. That was three hundred years ago.",
+      "tts": "[sighs] Gerald went out for mushrooms. Said he'd be back by supper. [pause] That was three hundred years ago.",
+      "fullBody": "lonely-stump"
+    },
+    {
+      "id": "intro-05",
+      "file": "audio/voice/intro-05.mp3",
+      "pose": "sheepish",
+      "text": "Forgive me. I don't get many visitors. Or any, really. I've been talking to my lantern. She's a terrible listener.",
+      "tts": "[clears throat] Forgive me. I don't get many visitors. Or any, really. I've been talking to my lantern. [whispers] She's a terrible listener."
+    },
+    {
+      "id": "intro-06",
+      "file": "audio/voice/intro-06.mp3",
+      "pose": "neutral",
+      "text": "I am Bramblewick, keeper of the Seed Archive. And you are…?",
+      "tts": "I am Bramblewick, keeper of the Seed Archive. And you are…?",
+      "action": "show-name-input"
+    },
+    {
+      "id": "intro-07",
+      "file": "audio/voice/intro-07.mp3",
+      "pose": "smile",
+      "text": "Ah, {name}! A fine name. Much better than Gerald. Don't tell him I said that.",
+      "tts": "[warmly] Ah! A fine name. Much better than Gerald. [pause] Don't tell him I said that.",
+      "_note": "Bubble shows the typed name; audio stays generic."
+    },
+    {
+      "id": "intro-08",
+      "file": "audio/voice/intro-08.mp3",
+      "pose": "smug",
+      "text": "Every world begins as a seed… a single number holding forests, oceans… and secrets buried deep.",
+      "tts": "[mysterious] Every world begins as a seed… a single number holding forests, oceans… and secrets buried deep."
+    },
+    {
+      "id": "intro-09",
+      "file": "audio/voice/intro-09.mp3",
+      "pose": "dopey",
+      "text": "Most folk wander for hours searching for the right one. Fools. Gerald was one of them.",
+      "tts": "[chuckles] Most folk wander for hours searching for the right one. Fools. [pause] Gerald was one of them."
+    },
+    {
+      "id": "intro-10",
+      "file": "audio/voice/intro-10.mp3",
+      "pose": "smile",
+      "text": "But you've got me. Tell me what your heart wants to build, and I'll find the world that's been waiting for you.",
+      "tts": "[excited] But you've got me. Tell me what your heart wants to build, and I'll find the world that's been waiting for you."
+    },
+    {
+      "id": "intro-11",
+      "file": "audio/voice/intro-11.mp3",
+      "pose": "whisper",
+      "text": "Come, Traveller. The Archive awaits.",
+      "tts": "Come, Traveller. [whispers] The Archive awaits.",
+      "action": "seed-into-archway-then-home",
+      "fullBody": "casting"
+    }
+  ],
+  "idle": [
+    {
+      "id": "idle-01",
+      "file": "audio/voice/idle-01.mp3",
+      "pose": "smile",
+      "text": "You lost too? Ha! Join the club. I've been lost since 1702.",
+      "tts": "You lost too? [laughs] Ha! Join the club. I've been lost since 1702."
+    },
+    {
+      "id": "idle-02",
+      "file": "audio/voice/idle-02.mp3",
+      "pose": "suspicious",
+      "text": "Still there? Gerald used to stare like that. Then he wandered off.",
+      "tts": "[curious] Still there? Gerald used to stare like that. [pause] Then he wandered off."
+    },
+    {
+      "id": "idle-03",
+      "file": "audio/voice/idle-03.mp3",
+      "pose": "sad",
+      "text": "Take your time. I've got… well, eternity, mostly.",
+      "tts": "[sighs] Take your time. I've got… [pause] well, eternity, mostly."
+    },
+    {
+      "id": "idle-04",
+      "file": "audio/voice/idle-04.mp3",
+      "pose": "startled",
+      "text": "Oh! Sorry. Thought you'd fallen asleep. Happens to me constantly.",
+      "tts": "[startled] Oh! Sorry. [chuckles] Thought you'd fallen asleep. Happens to me constantly."
+    },
+    {
+      "id": "idle-05",
+      "file": "audio/voice/idle-05.mp3",
+      "pose": "whisper",
+      "text": "Psst… the jungle ones are the best. Don't tell the deserts.",
+      "tts": "[whispers] Psst… the jungle ones are the best. Don't tell the deserts."
+    }
+  ],
+  "textLines": {
+    "_note": "Text-only lines (no audio). Shown as speech bubbles with the fake mouth flap while the text types out. {name} is replaced with the player name.",
+    "edition-ask": {
+      "pose": "neutral",
+      "text": "Tell me, Traveller, do you hail from the Java lands or the Bedrock isles?"
+    },
+    "version-ask": {
+      "pose": "suspicious",
+      "text": "And which age of the world do you walk in?"
+    },
+    "quest-biome": {
+      "pose": "smile",
+      "text": "Where shall you wake each morning?"
+    },
+    "quest-sea": {
+      "pose": "neutral",
+      "text": "Do you fancy the sea about you?"
+    },
+    "quest-end": {
+      "pose": "whisper",
+      "text": "And how near must the End's door be?"
+    },
+    "quest-neighbours": {
+      "pose": "neutral",
+      "text": "Any neighbours you'd like nearby?"
+    },
+    "quest-cast": {
+      "pose": "smug",
+      "text": "Stand back, {name}. This one's a big spell."
+    },
+    "quest-unsure": {
+      "pose": "sheepish",
+      "text": "I've hidden the spells I can't yet vouch for in the Bedrock isles. Better none than a wrong one."
+    },
+    "search-zzz": {
+      "pose": "sleepy",
+      "text": "zzz…"
+    },
+    "search-found": {
+      "pose": "smile",
+      "text": "Ha! There it is. Gerald would be green with envy."
+    },
+    "search-none": {
+      "pose": "sheepish",
+      "text": "Bah! Even I can't conjure that one. Shall we loosen the spell a little?"
+    },
+    "search-done": {
+      "pose": "smug",
+      "text": "There. A shelf of worlds, all yours for the taking."
+    },
+    "book-empty": {
+      "pose": "sad",
+      "text": "Not a single world saved. Even Gerald kept a list."
+    },
+    "idle-dismiss": {
+      "pose": "dopey",
+      "text": "Hmph."
+    }
+  },
+  "idleRules": {
+    "afterSecondsInactive": 60,
+    "maxPerSession": 1,
+    "chance": 0.33,
+    "settingsToggle": "Let Bramblewick nap"
+  },
+  "talkRules": {
+    "mouthFlap": {
+      "neutral": [
+        "neutral",
+        "neutral-talk"
+      ],
+      "smile": [
+        "smile",
+        "smile-talk"
+      ]
+    },
+    "howTo": "While a clip plays, switch between the two frames for that pose based on the audio loudness (Web Audio AnalyserNode, open when the level passes about 0.08). Other poses don't have a talking frame, so give them a gentle bob in time with the audio instead.",
+    "idleMotion": "Always running: 2px float up and down every 3s, and a blink every 4 to 6 seconds (a brief switch to 'smug' or 'sleepy' looks like a blink).",
+    "fullBody": "The 'fullBody' entries play a one-off full-body sprite moment (from the first pose sheet) before settling back into the portrait."
+  }
+}

@@ -1,0 +1,76 @@
+/*
+ * 9-slice frames. Slice values come from src/assets/ui/nine-slice.json.
+ * Border widths are slice * --px (0.25 by default, as the kit recommends), so
+ * corners stay crisp while the middle stretches. Raise --px for chunkier frames.
+ */
+.frame {
+  --px: 0.25;
+  box-sizing: border-box;
+  border-style: solid;
+  border-color: transparent;
+  image-rendering: pixelated;
+}
+.frame-panel-wood {
+  border-width: calc(100px * var(--px)) calc(100px * var(--px)) calc(90px * var(--px)) calc(100px * var(--px));
+  border-image: url(../assets/ui/panel-wood.png) 100 100 90 100 fill / calc(100px * var(--px)) calc(100px * var(--px)) calc(90px * var(--px)) calc(100px * var(--px)) stretch;
+}
+.frame-panel-stone {
+  border-width: calc(100px * var(--px)) calc(120px * var(--px)) calc(95px * var(--px)) calc(120px * var(--px));
+  border-image: url(../assets/ui/panel-stone.png) 100 120 95 120 fill / calc(100px * var(--px)) calc(120px * var(--px)) calc(95px * var(--px)) calc(120px * var(--px)) stretch;
+}
+.frame-banner-scroll {
+  border-width: calc(50px * var(--px)) calc(100px * var(--px));
+  border-image: url(../assets/ui/banner-scroll.png) 50 100 50 100 fill / calc(50px * var(--px)) calc(100px * var(--px)) stretch;
+}
+.frame-button-primary {
+  border-width: calc(55px * var(--px)) calc(115px * var(--px));
+  border-image: url(../assets/ui/button-primary-stone.png) 55 115 55 115 fill / calc(55px * var(--px)) calc(115px * var(--px)) stretch;
+}
+.frame-button-secondary {
+  border-width: calc(60px * var(--px)) calc(70px * var(--px));
+  border-image: url(../assets/ui/button-secondary-wood.png) 60 70 60 70 fill / calc(60px * var(--px)) calc(70px * var(--px)) stretch;
+}
+.frame-card {
+  border-width: calc(60px * var(--px));
+  border-image: url(../assets/ui/card-parchment.png) 60 60 60 60 fill / calc(60px * var(--px)) stretch;
+}
+.frame-progress-empty {
+  border-width: calc(45px * var(--px)) calc(70px * var(--px));
+  border-image: url(../assets/ui/progress-empty.png) 45 70 45 70 fill / calc(45px * var(--px)) calc(70px * var(--px)) stretch;
+}
+.frame-progress-full {
+  border-width: calc(45px * var(--px)) calc(70px * var(--px));
+  border-image: url(../assets/ui/progress-full.png) 45 70 45 70 fill / calc(45px * var(--px)) calc(70px * var(--px)) stretch;
+}
+
+/* Content inside a frame may sit over the decorative border a little. */
+.frame > .frame-in { margin: calc(-30px * var(--px)); }
+
+/* Speech bubble: drawn in code, square pixel corners. */
+.bubble {
+  position: relative;
+  background: #fbf4e6;
+  border: 3px solid #2b1a10;
+  color: #2b1a10;
+  box-shadow: 3px 3px 0 rgba(15, 1, 40, 0.55);
+}
+.bubble-tail,
+.bubble-tail::after {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+.bubble-tail {
+  bottom: -15px;
+  left: 44px;
+  border-width: 15px 12px 0 0;
+  border-color: #2b1a10 transparent transparent transparent;
+}
+.bubble-tail::after {
+  content: '';
+  left: 3px;
+  top: -18px;
+  border-width: 10px 7px 0 0;
+  border-color: #fbf4e6 transparent transparent transparent;
+}
