@@ -46,7 +46,7 @@ export function Book() {
                       <div className="min-w-0 flex-1">
                         <div className="truncate font-body text-[18px] font-semibold tabular-nums leading-tight">{b.seed}</div>
                         <div className="text-[12px] leading-tight text-ink/75">
-                          {b.edition === 'java' ? 'Java' : 'Bedrock'} {v?.label} · {prettyBiome(b.spawnBiome)} · spawn {b.spawn.x}, {b.spawn.z}
+                          {b.edition === 'java' ? `Java ${v?.java}` : `Bedrock ${v?.bedrock ?? v?.label}`} · {prettyBiome(b.spawnBiome)} · spawn {b.spawn.x}, {b.spawn.z}
                         </div>
                       </div>
                       <button

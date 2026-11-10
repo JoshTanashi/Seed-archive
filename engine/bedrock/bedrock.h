@@ -41,8 +41,8 @@ int bedrockStructurePos(int structType, int mc, uint64_t seed,
  * g must be seeded for the Overworld (Nether types need no biome check). */
 int bedrockStructureViable(int structType, const Generator *g, Pos pos);
 
-/* World spawn (Bedrockified's findSpawnPosition, on the 1:4 biome grid). */
-Pos bedrockSpawn(const Generator *g);
+/* World spawn: from 1.18 Bedrock picks it the way Java does (best climate
+ * near the origin), so cubiomes' getSpawn() serves both editions. */
 
 /* Strongholds: the three "village strongholds" first, then the scattered grid
  * strongholds whose cell lies within gridRadius cells of the origin cell.

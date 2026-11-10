@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">The Seed Archive</string>
+    <string name="title_activity_main">The Seed Archive</string>
+    <string name="package_name">app.seedarchive</string>
+    <string name="custom_url_scheme">app.seedarchive</string>
+</resources>

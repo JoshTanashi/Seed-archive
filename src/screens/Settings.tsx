@@ -30,7 +30,7 @@ export function Settings() {
       <TopBar title="Settings" />
       <div className="scroll-y mt-2 min-h-0 flex-1">
         <Frame kind="panel-stone" scale={0.3} className="w-full">
-          <div className="flex flex-col gap-1 px-1 py-1">
+          <div className="flex flex-col gap-1 px-4 py-2">
             {toggle('sfx', 'Sound effects')}
             {toggle('ambience', 'Forest ambience')}
             {toggle('voice', "Bramblewick's voice")}

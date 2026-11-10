@@ -25,16 +25,25 @@ export const CONFIRMED: Record<Edition, Confirmed> = {
     spawn: true,
     strongholds: true,
     structs: {
-      village: true, 'ancient-city': true, fortress: true, 'ruined-portal': true, mansion: true,
-      'jungle-temple': true, shipwreck: true, 'trial-chamber': true, pyramid: true, monument: true,
+      village: true, 'ancient-city': true, fortress: true, shipwreck: true,
+      'trial-chamber': true, monument: true,
+      // too far from the reference (the terrain decides where these end up)
+      'jungle-temple': false, 'ruined-portal': false,
+      // too few of these near the origin in the reference seeds to judge yet
+      mansion: false, pyramid: false,
     },
   },
   bedrock: {
-    spawn: false,
-    strongholds: false,
+    spawn: true,
+    strongholds: true,
     structs: {
-      village: false, 'ancient-city': false, fortress: false, 'ruined-portal': false, mansion: false,
-      'jungle-temple': false, shipwreck: false, 'trial-chamber': false, pyramid: false, monument: false,
+      village: true, fortress: true, 'ruined-portal': true,
+      // Bedrock also checks the terrain height for these, which the engine
+      // only approximates: 3% to 12% of its answers are not in the reference
+      'ancient-city': false, 'trial-chamber': false, shipwreck: false, monument: false,
+      'jungle-temple': false, pyramid: false,
+      // too few in the reference seeds to judge yet
+      mansion: false,
     },
   },
 };

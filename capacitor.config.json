@@ -1,0 +1,7 @@
+{
+  "appId": "app.seedarchive",
+  "appName": "The Seed Archive",
+  "webDir": "dist",
+  "backgroundColor": "#0F0128",
+  "ios": { "contentInset": "never" }
+}

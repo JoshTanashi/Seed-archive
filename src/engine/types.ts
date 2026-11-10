@@ -5,18 +5,21 @@ export interface VersionGroup {
   idx: number;
   label: string;
   java: string;
-  bedrock: string;
+  /** null: not offered on Bedrock (not confirmed against the reference) */
+  bedrock: string | null;
 }
 export const VERSIONS: VersionGroup[] = [
   { idx: 0, label: '1.18', java: '1.18 – 1.18.2', bedrock: '1.18' },
   { idx: 1, label: '1.19', java: '1.19 – 1.19.4', bedrock: '1.19' },
   { idx: 2, label: '1.20', java: '1.20 – 1.20.6', bedrock: '1.20' },
-  { idx: 3, label: '1.21', java: '1.21 – 1.21.3', bedrock: '1.21.0 – 1.21.4x' },
-  { idx: 4, label: '1.21.4', java: '1.21.4', bedrock: '1.21.50 – 1.21.6x' },
-  { idx: 5, label: '1.21.5 – 26.1', java: '1.21.5 – 26.1', bedrock: '1.21.70 – 26.1x' },
-  { idx: 6, label: '26.2', java: '26.2', bedrock: '26.2x' },
-  { idx: 7, label: '26.3', java: '26.3', bedrock: '26.3x' },
+  { idx: 3, label: '1.21', java: '1.21 – 1.21.3', bedrock: null },
+  { idx: 4, label: '1.21.4', java: '1.21.4', bedrock: null },
+  { idx: 5, label: '1.21.5 – 26.1', java: '1.21.5 – 26.1', bedrock: '1.21.70 – 26.40' },
+  { idx: 6, label: '26.2', java: '26.2', bedrock: null },
+  { idx: 7, label: '26.3', java: '26.3', bedrock: '26.50 – 26.60' },
 ];
+export const versionsFor = (edition: Edition): VersionGroup[] =>
+  VERSIONS.filter((v) => edition === 'java' || v.bedrock !== null);
 export const LATEST_VERSION = VERSIONS[VERSIONS.length - 1].idx;
 
 /** Structure ids match the S_* enum in sa_engine.c. */

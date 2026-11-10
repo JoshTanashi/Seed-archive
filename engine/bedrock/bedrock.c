@@ -130,9 +130,56 @@ int bedrockStructurePos(int structType, int mc, uint64_t seed,
     return 1;
 }
 
+/* Biomes are sampled on the 1:4 grid, high up so that cave biomes never mask
+ * the surface biome. (The game samples at the terrain surface.) */
+static int cellBiome(const Generator *g, int qx, int qz)
+{
+    return getBiomeAt(g, 4, qx, 319 >> 2, qz);
+}
+
 static int surfaceBiome(const Generator *g, int x, int z)
-{   /* sampled high up so cave biomes never mask the surface biome */
-    return getBiomeAt(g, 4, x >> 2, 319 >> 2, z >> 2);
+{
+    return cellBiome(g, x >> 2, z >> 2);
+}
+
+enum { A_VILLAGE, A_DEEP_OCEAN, A_WATER, A_MANSION, A_SAME };
+
+static int areaOk(int kind, int mc, int id, int same)
+{
+    switch (kind)
+    {
+    case A_VILLAGE:
+        return id == plains || id == sunflower_plains || id == savanna ||
+               id == snowy_plains || id == taiga || id == snowy_taiga ||
+               id == desert || id == meadow;
+    case A_DEEP_OCEAN:
+        return isDeepOcean(id);
+    case A_WATER:
+        return isOceanic(id) || id == river || id == frozen_river;
+    case A_MANSION:
+        return id == dark_forest || (id == pale_garden && mc >= MC_1_21_5);
+    case A_SAME:
+        return id == same;
+    }
+    return 0;
+}
+
+/* Every 1:4 biome cell touching the square of +-r blocks around (x, z). */
+static int areaAll(const Generator *g, int x, int z, int r, int kind, int same)
+{
+    int qx, qz;
+    int x0 = (x - r) >> 2, x1 = (x + r) >> 2, z0 = (z - r) >> 2, z1 = (z + r) >> 2;
+    for (qz = z0; qz <= z1; qz++)
+        for (qx = x0; qx <= x1; qx++)
+            if (!areaOk(kind, g->mc, cellBiome(g, qx, qz), same))
+                return 0;
+    return 1;
+}
+
+static int monumentViable(const Generator *g, Pos pos)
+{
+    return areaAll(g, pos.x, pos.z, 16, A_DEEP_OCEAN, 0) &&
+           areaAll(g, pos.x, pos.z, 29, A_WATER, 0);
 }
 
 int bedrockStructureViable(int structType, const Generator *g, Pos pos)
@@ -145,24 +192,46 @@ int bedrockStructureViable(int structType, const Generator *g, Pos pos)
         return 1;
     case Trial_Chambers:
         return isViableStructurePos(structType, (Generator*)g, pos.x, pos.z, 0);
+    case Village:
+        /* the biome cells around the chunk's +8,+8 block */
+        return areaAll(g, pos.x, pos.z, 2, A_VILLAGE, 0);
     case Ancient_City:
-        id = getBiomeAt(g, 4, pos.x >> 2, -27 >> 2, pos.z >> 2);
+        /* sampled at the chunk corner, not its middle */
+        id = getBiomeAt(g, 4, (pos.x - 8) >> 2, -27 >> 2, (pos.z - 8) >> 2);
         return id == deep_dark;
     case Monument:
-        /* needs deep ocean at the centre and ocean/river all around */
-        return isViableStructurePos(Monument, (Generator*)g, pos.x, pos.z, 0);
+        return monumentViable(g, pos);
     case Mansion:
+        return areaAll(g, pos.x, pos.z, 32, A_MANSION, 0);
+    case Shipwreck:
     {
-        int dx, dz;
-        for (dx = -1; dx <= 1; dx++)
-            for (dz = -1; dz <= 1; dz++)
+        int cx = pos.x >> 4, cz = pos.z >> 4, rx, rz, onShore;
+        id = surfaceBiome(g, pos.x, pos.z);
+        onShore = id == beach || id == snowy_beach || id == stony_shore;
+        if (!onShore && !isOceanic(id))
+            return 0;
+        /* one unbroken biome all around ... */
+        if (!areaAll(g, pos.x, pos.z, onShore ? 10 : 20, A_SAME, id))
+            return 0;
+        /* ... and no ocean monument within five chunks */
+        for (rx = floordiv(cx - 5, 32); rx <= floordiv(cx + 4, 32); rx++)
+            for (rz = floordiv(cz - 5, 32); rz <= floordiv(cz + 4, 32); rz++)
             {
-                id = surfaceBiome(g, pos.x + dx*32, pos.z + dz*32);
-                if (!isViableFeatureBiome(g->mc, Mansion, id))
+                Pos m;
+                int mx, mz;
+                if (!bedrockStructurePos(Monument, g->mc, g->seed, rx, rz, &m))
+                    continue;
+                mx = m.x >> 4; mz = m.z >> 4;
+                if (mx >= cx - 5 && mx < cx + 5 && mz >= cz - 5 && mz < cz + 5 &&
+                    monumentViable(g, m))
                     return 0;
             }
         return 1;
     }
+    case Jungle_Temple:
+        return surfaceBiome(g, pos.x, pos.z) == jungle;
+    case Desert_Pyramid:
+        return surfaceBiome(g, pos.x, pos.z) == desert;
     default:
         /* Bedrock samples the biome at the chunk's +8,+8 block */
         id = surfaceBiome(g, pos.x, pos.z);
@@ -171,82 +240,29 @@ int bedrockStructureViable(int structType, const Generator *g, Pos pos)
 }
 
 /* ------------------------------------------------------------------------ */
-/* World spawn                                                               */
-/* ------------------------------------------------------------------------ */
-
-static int isSpawnBiome(int id)
-{
-    switch (id)
-    {
-    case forest: case plains: case taiga: case taiga_hills:
-    case wooded_hills: case jungle: case jungle_hills:
-        return 1;
-    default:
-        return 0;
-    }
-}
-
-Pos bedrockSpawn(const Generator *g)
-{
-    enum { N = 10 };
-    int ids[N*N];
-    int x, i, dx, dz;
-    Pos p = { 0, 0 };
-
-    /* Walks east in 40 block steps until a 10x10 patch of 1:4 biome cells has
-     * a spawn biome cell whose four neighbours are spawn biomes too. The
-     * neighbour lookups index the flat array, so the west neighbour of the
-     * first column is the last cell of the row above (as the game does). */
-    for (x = 0; x < 40 * 4096; x += 40)
-    {
-        for (i = 0; i < N*N; i++)
-            ids[i] = getBiomeAt(g, 4, x/4 + i % N, 319 >> 2, i / N);
-        for (dz = 1; dz < N-1; dz++)
-            for (dx = 0; dx < N; dx++)
-            {
-                i = dz*N + dx;
-                if (isSpawnBiome(ids[i]) && isSpawnBiome(ids[i-1]) &&
-                    isSpawnBiome(ids[i+1]) && isSpawnBiome(ids[i-N]) &&
-                    isSpawnBiome(ids[i+N]))
-                {
-                    p.x = 4*dx + x;
-                    p.z = 4*dz;
-                    return p;
-                }
-            }
-    }
-    return p;
-}
-
-/* ------------------------------------------------------------------------ */
 /* Strongholds                                                               */
 /* ------------------------------------------------------------------------ */
 
-static int villageStartsAt(const Generator *g, int cx, int cz)
+/* The game's sine table: 65536 entries, indexed by angle * 10430.378. */
+static float tableSin(float angle, int quarterTurn)
 {
-    const int spacing = 34;
-    Pos p;
-    int rx = floordiv(cx, spacing), rz = floordiv(cz, spacing);
-    if (!bedrockStructurePos(Village, g->mc, g->seed, rx, rz, &p))
-        return 0;
-    if ((p.x >> 4) != cx || (p.z >> 4) != cz)
-        return 0;
-    return bedrockStructureViable(Village, g, p);
+    float f = (float)(angle * 10430.378f) + (float)(quarterTurn ? 16384 : 0);
+    int i = ((int)f % 65536 + 65536) % 65536;
+    return (float)sin(i * 3.14159265358979323846 * 2.0 / 65536.0);
 }
 
 static int scatteredStronghold(uint64_t seed, int gx, int gz, Pos *out)
 {
-    /* one attempt per 200x200 chunk cell, in its middle 100x100, 25% chance */
+    /* one attempt per 200x200 chunk cell, in its middle 100x100, 25% chance.
+     * The cell's RNG seed is built from the cell's centre chunk. */
     BMt r;
-    int minX = 200*gx + 50, minZ = 200*gz + 50, cx, cz;
-    bmtSeed(&r, (uint32_t)(784295783249ull * (uint64_t)(int64_t)gx
-                         + 827828252345ull * (uint64_t)(int64_t)gz
+    int cx, cz;
+    bmtSeed(&r, (uint32_t)(784295783249ull * (uint64_t)(int64_t)(gx*200 + 100)
+                         + 827828252345ull * (uint64_t)(int64_t)(gz*200 + 100)
                          + seed + 97858791ull));
-    cx = minX + (int)bmtNextInt(&r, 100);
-    cz = minZ + (int)bmtNextInt(&r, 100);
+    cx = 200*gx + 50 + (int)bmtNextInt(&r, 100);
+    cz = 200*gz + 50 + (int)bmtNextInt(&r, 100);
     if (!(bmtNextFloat(&r) < 0.25f))
-        return 0;
-    if (cx*cx + cz*cz < 10*10)
         return 0;
     out->x = cx * 16 + 8;
     out->z = cz * 16 + 8;
@@ -266,17 +282,29 @@ int bedrockStrongholds(const Generator *g, Pos *out, int max, int gridRadius)
 
     for (tries = 0; nv < 3 && tries < 256; tries++)
     {
-        int cx = (int)floor(radius * cos(angle));
-        int cz = (int)floor(radius * sin(angle));
-        int ox, oz, placed = 0;
-        for (ox = cx - 8; ox < cx + 8 && !placed; ox++)
-            for (oz = cz - 8; oz < cz + 8 && !placed; oz++)
-                if (villageStartsAt(g, ox, oz))
-                {
-                    vill[nv].x = ox; vill[nv].z = oz;
-                    nv++;
-                    placed = 1;
-                }
+        int cx = (int)floor((float)(radius * tableSin(angle, 1)));
+        int cz = (int)floor((float)(radius * tableSin(angle, 0)));
+        int rx, rz, placed = 0, bx = 0, bz = 0;
+        /* The game scans the 16x16 chunks around (cx, cz), x outermost, for
+         * the first village start. Each region holds one village attempt, so
+         * it is enough to look at the regions the window touches. */
+        for (rx = floordiv(cx - 8, 34); rx <= floordiv(cx + 7, 34); rx++)
+            for (rz = floordiv(cz - 8, 34); rz <= floordiv(cz + 7, 34); rz++)
+            {
+                Pos p;
+                int vx, vz;
+                if (!bedrockStructurePos(Village, g->mc, g->seed, rx, rz, &p))
+                    continue;
+                vx = p.x >> 4; vz = p.z >> 4;
+                if (vx < cx - 8 || vx >= cx + 8 || vz < cz - 8 || vz >= cz + 8)
+                    continue;
+                if (placed && !(vx < bx || (vx == bx && vz < bz)))
+                    continue;
+                if (!bedrockStructureViable(Village, g, p))
+                    continue;
+                bx = vx; bz = vz; placed = 1;
+            }
+        if (placed) { vill[nv].x = bx; vill[nv].z = bz; nv++; }
         if (placed) { angle += 0.6f * 3.14159265358979323846f; radius += 8; }
         else        { angle += 0.25f * 3.14159265358979323846f; radius += 4; }
     }
@@ -289,12 +317,7 @@ int bedrockStrongholds(const Generator *g, Pos *out, int max, int gridRadius)
         for (gz = -gridRadius - 1; gz <= gridRadius; gz++)
         {
             Pos p;
-            int taken = 0;
-            /* a cell that already holds a village stronghold has no other */
-            for (i = 0; i < nv; i++)
-                if (floordiv(vill[i].x, 200) == gx && floordiv(vill[i].z, 200) == gz)
-                    taken = 1;
-            if (taken || n >= max) continue;
+            if (n >= max) continue;
             if (scatteredStronghold(g->seed, gx, gz, &p))
                 out[n++] = p;
         }

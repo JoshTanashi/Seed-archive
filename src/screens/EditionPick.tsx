@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { audio } from '../audio/AudioManager';
 import { BackButton, Page, PixelButton, ProgressBar } from '../components/ui';
 import { WizardSays } from '../components/WizardSays';
-import { LATEST_VERSION, VERSIONS, type Edition } from '../engine/types';
+import { LATEST_VERSION, versionsFor, type Edition } from '../engine/types';
 import { useApp } from '../store';
 
 /** Text-only bubbles: edition first, then the version group. */
@@ -37,6 +37,7 @@ export function EditionPick() {
               onClick={() => {
                 audio.sfx('dialogue-blip');
                 setEd(e);
+                if (!versionsFor(e).some((v) => v.idx === version)) setVersion(LATEST_VERSION);
                 setStep(1);
               }}
             >
@@ -51,7 +52,7 @@ export function EditionPick() {
         <>
           <div className="scroll-y mt-3 min-h-0 flex-1 px-4">
             <div className="flex flex-col gap-2 pb-2">
-              {[...VERSIONS].reverse().map((v) => (
+              {[...versionsFor(edition)].reverse().map((v) => (
                 <button
                   key={v.idx}
                   type="button"

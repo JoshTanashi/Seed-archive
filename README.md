@@ -18,13 +18,14 @@ npm run build      # production build into dist/
 
 ### iPhone and Android (Capacitor)
 
+The `ios/` and `android/` projects are already in the repo, with icons and
+splash screens generated from `/resources`.
+
 ```bash
-npm run build
-npx cap add ios          # once, on a Mac with Xcode
-npx cap add android      # once
-npm run assets           # icons and splash from /resources
-npx cap sync
-npx cap open ios
+npm run sync             # build the web app and copy it into both projects
+npx cap open ios         # on a Mac with Xcode; run on an iPhone from there
+npx cap open android
+npm run assets           # only if /resources changes
 ```
 
 ## Layout
@@ -54,12 +55,44 @@ source /path/to/emsdk/emsdk_env.sh
 npm run engine
 ```
 
+### How it was checked
+
+`tests/known-seeds.json` holds reference positions for 39 seeds (27 Bedrock,
+12 Java, plus the same Bedrock seeds on older versions): spawn, strongholds and
+ten structure types. Every value was read out of the Chunkbase seed map with
+`scripts/harvest-chunkbase.mjs`; none comes from this engine. `npm test`
+compares the engine against it, allowing 16 blocks.
+
+They were read by script rather than by eye, and from Chunkbase rather than a
+real world. Before a public release, spot-check a few in the game as well.
+
 ### What is offered per edition
 
 `src/engine/capabilities.ts` lists which filters each edition may show. A filter
-is only switched on once its answers pass the tests against hand-checked seeds
-in `tests/known-seeds.json`; anything unconfirmed stays hidden rather than
-showing results that might be wrong.
+is on only if the tests show the engine finds at least 99% of the reference
+structures and at most 2% of its own answers are missing from the reference.
+Anything short of that stays hidden rather than showing results that might be
+wrong.
+
+| | Bedrock | Java |
+|---|---|---|
+| Spawn point, spawn biome, island / coast / inland | yes | yes |
+| Stronghold distance | yes | yes |
+| Village, Nether fortress | yes | yes |
+| Ruined portal | yes | hidden |
+| Ancient city, trial chamber, shipwreck, ocean monument | hidden | yes |
+| Jungle temple, desert pyramid, woodland mansion | hidden | hidden |
+| Dungeon | never (cannot be computed from the seed alone) | never |
+
+The hidden Bedrock ones depend on terrain height, which the engine only
+approximates. Bedrock versions 1.21.0 to 1.21.6x are not offered because the
+spawn point was off by more than 16 blocks on one reference seed.
+
+### Seed range
+
+Java seeds are drawn from the full signed 64-bit range. Bedrock seeds are drawn
+from 0 to 2,147,483,647, which every Bedrock version accepts when typed as a
+plain number.
 
 ### Phase 2
 

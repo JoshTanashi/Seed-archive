@@ -93,7 +93,8 @@ API const char *sa_biome_name(int id)
 
 static Pos spawnPos(void)
 {
-    return g_edition == ED_BEDROCK ? bedrockSpawn(&g_ow) : getSpawn(&g_ow);
+    /* 1.18+: both editions pick the spawn the same way */
+    return getSpawn(&g_ow);
 }
 
 API void sa_spawn(int32_t *out)
@@ -364,8 +365,54 @@ static double dist(int ax, int az, int bx, int bz)
 API int sa_check(int32_t *out)
 {
     Pos sp, sh[12];
-    int id, bm, ls = LS_ANY, i, k, n;
+    int id, bm, ls = LS_ANY, i, k, n, nsh = -1;
     double parts = 0, sum = 0;
+
+    /* 0. Quick screens around the origin. Working out the spawn point is by
+     * far the most expensive step, and the spawn is almost always within a
+     * few hundred blocks of the origin, so seeds that plainly cannot match
+     * are dropped first. A screen only ever skips a seed; everything that
+     * gets through is still checked exactly below, in the usual order. */
+    if (F.biome != B_ANY || F.landSea != LS_ANY)
+    {
+        int nb = 0, no = 0, gx, gz;
+        int cave = F.biome == B_LUSH_CAVES || F.biome == B_DEEP_DARK;
+        int cy = F.biome == B_DEEP_DARK ? -40 : 8;
+        for (gz = -384; gz <= 384; gz += 128)
+            for (gx = -384; gx <= 384; gx += 128)
+            {
+                int b = surfaceAt(gx, gz);
+                if (isOceanic(b)) no++;
+                if (F.biome != B_ANY &&
+                    inGroup(F.biome, cave ? getBiomeAt(&g_ow, 4, gx >> 2, cy >> 2, gz >> 2) : b))
+                    nb++;
+            }
+        if (F.biome != B_ANY && nb == 0) { g_reached[ST_SPAWN]++; return 0; }
+        if ((F.landSea == LS_ISLAND && no < 20) ||
+            (F.landSea == LS_COAST && (no < 2 || no > 47)) ||
+            (F.landSea == LS_INLAND && no > 30))
+        {
+            g_reached[ST_SPAWN]++; g_passed[ST_SPAWN]++; g_reached[ST_LANDSEA]++;
+            return 0;
+        }
+    }
+    if (F.shMax > 0 && g_edition == ED_BEDROCK)
+    {   /* Bedrock strongholds do not depend on the spawn point */
+        double best = 1e18;
+        nsh = strongholds(sh, 12);
+        for (i = 0; i < nsh; i++)
+        {
+            double d = dist(sh[i].x, sh[i].z, 0, 0);
+            if (d < best) best = d;
+        }
+        if (best > F.shMax + 640)
+        {
+            g_reached[ST_SPAWN]++; g_passed[ST_SPAWN]++;
+            g_reached[ST_LANDSEA]++; g_passed[ST_LANDSEA]++;
+            g_reached[ST_STRONGHOLD]++;
+            return 0;
+        }
+    }
 
     /* 1. spawn biome */
     g_reached[ST_SPAWN]++;
@@ -393,7 +440,7 @@ API int sa_check(int32_t *out)
     if (F.shMax > 0)
     {
         double best = 1e18;
-        n = strongholds(sh, g_edition == ED_BEDROCK ? 12 : 3);
+        n = nsh >= 0 ? nsh : strongholds(sh, g_edition == ED_BEDROCK ? 12 : 3);
         for (i = 0; i < n; i++)
         {
             double d = dist(sh[i].x, sh[i].z, sp.x, sp.z);
